@@ -1,3 +1,5 @@
+const {validationResult} = require('express-validator')
+
 const generateUrl = () =>{
     var length = 5,
         charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -13,10 +15,20 @@ var data = {}
 class controller {
 
     async short_my_url(req,res) {
-        const shorten_url = generateUrl()
-        const long_url = req.body.url
-        data[shorten_url] = long_url
-        await res.json({shortenUrl:`http://localhost:5000/${shorten_url}`})
+        try{
+            const errors = validationResult(req)
+            if(!errors.isEmpty()){
+                return res.status(400).json({message:"errors", errors})
+            }
+
+            const shorten_url = generateUrl()
+            const long_url = req.body.url
+            data[shorten_url] = long_url
+            await res.json({shortenUrl:`http://localhost:5000/${shorten_url}`})
+        } catch(e){
+            console.log(e)
+            res.json({message:"wrong url or try later"})
+        }    
     }
 
     async redirect(req,res) {
