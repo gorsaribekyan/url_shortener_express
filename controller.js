@@ -1,16 +1,21 @@
 const {validationResult} = require('express-validator')
+const data = require("./model.js")
 
-const generateUrl = () =>{
+const generateUrl = async () =>{
     var length = 5,
         charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-        retVal = "";
+        short_url = "";
     for (var i = 0, n = charset.length; i < length; ++i) {
-        retVal += charset.charAt(Math.floor(Math.random() * n));
+        short_url += charset.charAt(Math.floor(Math.random() * n));
     }
-    return retVal;
+    const short_url_existent = await data.findOne({short_url})
+    if(!short_url_existent){
+        return short_url;
+    }else{
+        return generateUrl()
+    }
 }
 
-var data = {}
 
 class controller {
 
@@ -21,13 +26,21 @@ class controller {
                 return res.status(400).json({message:"errors", errors})
             }
 
-            const shorten_url = generateUrl()
             const long_url = req.body.url
-            data[shorten_url] = long_url
-            await res.json({shortenUrl:`http://localhost:5000/${shorten_url}`})
+            const short_url = await generateUrl()
+            
+            console.log(short_url + " " + long_url)
+
+            const long_url_existent =  await data.findOne({long_url})
+            if(!long_url_existent){
+                const result = new data({long_url, short_url})
+                await result.save()     
+            }
+            res.json({shortenUrl:`http://localhost:5000/${short_url}`})
+
         } catch(e){
             console.log(e)
-            res.json({message:"wrong url or try later"})
+            res.status(400).json({message:"wrong url or try later"})
         }    
     }
 
@@ -36,7 +49,7 @@ class controller {
     }
 
     async get_all(req,res){
-        await res.send(JSON.stringify(data, undefined, 2))
+        res.send(JSON.stringify(data, undefined, 2))
     }
 }
 

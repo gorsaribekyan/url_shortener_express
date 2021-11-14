@@ -1,7 +1,7 @@
 const Router = require("express")
 const controller = require("./controller.js")
 const path = require("path")
-const {check} = require('express-validator')
+const middleware = require("./middleware.js")
 const router = new Router()
 
 router.get("/", (req,res) => {
@@ -16,11 +16,7 @@ router.get("/where", (req, res) => {
 
 router.get("/get_all", controller.get_all)
 
-router.post("/short-my-url",
-[check('url', 'this parameter not be empty').isLength({min:1, max:100})],
-[check('url', 'this text not a url').isURL()],
-
-controller.short_my_url)
+router.post("/short-my-url", middleware.short_my_url(), controller.short_my_url)
 
 router.get("/:id", controller.redirect)
 
