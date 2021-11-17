@@ -11,7 +11,7 @@ app.use("/", Router)
 
 const start = async () => {
     try{
-        const port = process.env.PORT
+        const port = process.env.PORT || 5000
         app.listen(port, () => console.log(`\n[+] server started on port ${port}`))        
         await mongoose.connect(process.env.MONGODB_CONNECTION_STRING)
         console.log('[+] mongobd database connected')

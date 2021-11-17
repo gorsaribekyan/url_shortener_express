@@ -4,9 +4,11 @@ const path = require("path")
 const middleware = require("./middleware.js")
 const router = new Router()
 
+
 router.get("/", (req,res) => {
     res.sendFile(path.resolve("public/index.html"))
 })
+
 
 router.get("/where", (req, res) => {
 

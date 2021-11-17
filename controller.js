@@ -23,7 +23,7 @@ class controller {
         try{
             const errors = validationResult(req)
             if(!errors.isEmpty()){
-                return res.status(400).json({message:"errors", errors})
+                return res.status(400).json(errors)
             }
 
             const long_url = req.body.url
@@ -45,12 +45,17 @@ class controller {
     }
 
     async redirect(req,res) {
-        await res.redirect(data[req.params.id])
+        console.log("mi ban")
+        //await res.redirect(data[req.params.id])
     }
+
+
+
 
     async get_all(req,res){
         res.send(JSON.stringify(data, undefined, 2))
     }
+
 }
 
 module.exports = new controller()
