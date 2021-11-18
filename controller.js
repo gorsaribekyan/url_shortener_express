@@ -16,7 +16,6 @@ const generateUrl = async () =>{
     }
 }
 
-
 class controller {
 
     async short_my_url(req,res) {
@@ -26,17 +25,28 @@ class controller {
                 return res.status(400).json(errors)
             }
 
-            const long_url = req.body.url
-            const short_url = await generateUrl()
+            var long_url = req.body.url // ֆռոնտից եկած կայքի յղում
             
-            console.log(short_url + " " + long_url)
-
-            const long_url_existent =  await data.findOne({long_url})
-            if(!long_url_existent){
-                const result = new data({long_url, short_url})
-                await result.save()     
+            const protocol = long_url.match(/^(?:(ht|f)tp(s?)\:\/\/)?/g)[0]
+            if(!protocol){
+                long_url = "http://" + long_url
             }
-            res.json({shortenUrl:`http://localhost:5000/${short_url}`})
+            console.log(protocol)
+
+            const long_url_existent = await data.findOne({long_url})
+            console.log(long_url_existent)
+            if(!long_url_existent){
+                const short_url = await generateUrl()
+
+
+                const result = new data({long_url, short_url})
+                await result.save()
+                res.json({shortenUrl:`http://localhost:5000/${short_url}`})
+                 
+            }else{
+                res.json({shortenUrl:`http://localhost:5000/${long_url_existent.short_url}`})
+
+            }
 
         } catch(e){
             console.log(e)
@@ -45,15 +55,10 @@ class controller {
     }
 
     async redirect(req,res) {
-        console.log("mi ban")
-        //await res.redirect(data[req.params.id])
-    }
+        const url_obj = await data.findOne({short_url:req.params.id})//.short_url
+        res.status(301).redirect(url_obj.long_url)
 
-
-
-
-    async get_all(req,res){
-        res.send(JSON.stringify(data, undefined, 2))
+        //res.redirect(await data.findOne({short_url:req.params.id}).long_url)
     }
 
 }
