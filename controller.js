@@ -17,7 +17,6 @@ const generateUrl = async () =>{
 }
 
 class controller {
-
     async short_my_url(req,res) {
         try{
             const errors = validationResult(req)
@@ -31,7 +30,10 @@ class controller {
             if(!protocol){
                 long_url = "http://" + long_url
             }
-            console.log(protocol)
+
+            if(long_url.slice(long_url.length-1, long_url.length) !== "/"){
+                long_url += "/"
+            }
 
             const long_url_existent = await data.findOne({long_url})
             console.log(long_url_existent)
@@ -55,12 +57,22 @@ class controller {
     }
 
     async redirect(req,res) {
-        const url_obj = await data.findOne({short_url:req.params.id})//.short_url
-        res.status(301).redirect(url_obj.long_url)
-
-        //res.redirect(await data.findOne({short_url:req.params.id}).long_url)
+        try{
+            const url_obj = await data.findOne({short_url:req.params.id})//.short_url
+            res.status(301).redirect(url_obj.long_url)        
+        } catch(e){
+            res.status(404).json({message:"wrong url"})           
+        }
     }
 
+    async clear_all(req, res){
+        try{
+            await data.deleteMany();
+            res.send("200 | OK")        
+        }catch(error){
+            res.status(404).json({message:"oops:("})           
+        }
+    }
 }
 
 module.exports = new controller()
